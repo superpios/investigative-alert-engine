@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+data/input/*
+data/ranked/*
+data/history/*
+!data/input/.gitkeep
+!data/ranked/.gitkeep
+!data/history/.gitkeep
+.DS_Store

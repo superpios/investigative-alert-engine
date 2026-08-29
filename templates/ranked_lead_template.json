@@ -1,0 +1,32 @@
+{
+  "id": "LEAD-001-REGOLA-002-2025",
+  "title": "Nominativo presente in 5 incarichi su enti diversi – anno 2025",
+  "observed_facts": [
+    "5 incarichi distinti registrati",
+    "3 enti pubblici diversi"
+  ],
+  "sources": [
+    {
+      "source_dataset": "incarichi-nominativi-shard",
+      "source_record_id": "abc123",
+      "source_url": "https://example.org/atto"
+    }
+  ],
+  "period": "2025",
+  "rule_id": "REGOLA-002",
+  "why_worth_checking": "Concentrazione quantitativa superiore alla soglia minima definita",
+  "what_cannot_be_claimed": [
+    "Non dimostra illecito",
+    "Non risolve eventuali omonimie",
+    "Non implica responsabilità"
+  ],
+  "data_through": "2026-08-12",
+  "disclaimer": "Questo non dimostra alcun illecito. Indica solo una concentrazione di segnali quantitativi che merita verifica umana.",
+  "priority_score": 42.0,
+  "priority_reasons": [
+    "concentrazione: 5 incarichi (soglia 3)"
+  ],
+  "rank_position": 1,
+  "ranking_date": "2026-08-29",
+  "ranking_version": "0.1"
+}

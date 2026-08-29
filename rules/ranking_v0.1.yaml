@@ -1,0 +1,46 @@
+# ranking_v0.1.yaml
+# Regole di prioritizzazione conservative.
+# Ogni regola deve essere validata manualmente su almeno 20 piste reali prima di essere attivata.
+
+version: "0.1"
+description: "Ranking quantitativo e conservativo delle piste investigative"
+
+# Pesi massimi (somma = 100)
+weights:
+  concentration: 30
+  repeated_direct_awards: 25
+  renewals: 20
+  high_amount: 15
+  persistence: 10
+
+# Soglie minime per attivare ogni criterio
+thresholds:
+  # Numero minimo di incarichi distinti sullo stesso nominativo
+  concentration_min_count: 3
+
+  # Numero minimo di affidamenti diretti ripetuti
+  repeated_direct_awards_min_count: 2
+
+  # Numero minimo di rinnovi/proroghe
+  renewals_min_count: 2
+
+  # Soglia relativa di importo (percentile sul dataset corrente)
+  # 0.90 = solo il top 10% degli importi del periodo
+  high_amount_percentile: 0.90
+
+  # Numero minimo di esecuzioni consecutive in cui la pista appare
+  persistence_min_runs: 2
+
+# Comportamento
+behavior:
+  # Se una pista non raggiunge nessun criterio, score = 0 e viene comunque inclusa in fondo
+  include_zero_score: true
+
+  # Ordine di tie-break in caso di score uguale
+  tie_break:
+    - data_through  # più recente prima
+    - id            # stabile
+
+# Disclaimer obbligatorio (non modificare)
+disclaimer: >
+  Questo non dimostra alcun illecito. Indica solo una concentrazione di segnali quantitativi che merita verifica umana.
