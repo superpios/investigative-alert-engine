@@ -21,7 +21,7 @@ priority_score = min(100, somma_pesata_dei_criteri_attivi)
 
 Ogni criterio attivo aggiunge il proprio contributo solo se supera una soglia minima definita in `rules/ranking_v0.1.yaml`.
 
-Il contributo di un criterio scala linearmente dal valore soglia fino al peso massimo (raggiunto a ~12 ripetizioni), poi è cap al peso massimo. Nessun contributo è basato su inferenze: solo conteggi grezzi estratti dai fatti osservati. La data del ranking (`ranking_date`) è derivata dai dati (`data_through`), mai dall'orario di esecuzione, per garantire determinismo.
+Il contributo di un criterio scala linearmente dal valore soglia fino al peso massimo (raggiunto a ~12 ripetizioni), poi è limitato al peso massimo. Nessun contributo è basato su inferenze: solo conteggi grezzi estratti dai fatti osservati. La data del ranking (`ranking_date`) è derivata dai dati (`data_through`), mai dall'orario di esecuzione, per garantire determinismo.
 
 ## Cosa non influenza il punteggio
 

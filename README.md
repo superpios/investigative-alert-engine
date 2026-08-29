@@ -1,6 +1,6 @@
 # Investigative Alert Engine · DVNS
 
-Motore di **monitoraggio continuo e prioritizzazione** delle piste investigative generate da [investigative-leads-generator](https://github.com/superpios/investigative-leads-generator).
+Motore di **monitoraggio continuo e prioritizzazione** delle piste investigative generato da [investigative-leads-generator](https://github.com/superpios/investigative-leads-generator).
 
 Ogni output rimane un **segnale quantitativo che merita verifica**.  
 Nessuna conclusione, nessuna etichetta di frode, spreco o responsabilità.

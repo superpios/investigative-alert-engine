@@ -1,6 +1,6 @@
 # Principi vincolanti
 
-Questi principi non possono essere violati da nessuna regola o script.
+Questi principi non possono essere violati da alcuna regola o script.
 
 ## 1. Solo segnali, mai conclusioni
 
