@@ -1,0 +1,51 @@
+# Mappa codice ente (ipa / entity_id) -> denominazione ufficiale
+# Derivata da Explorer affidamenti_diretti (snapshot).
+# Se il codice non è presente, il feed mostra solo il codice grezzo.
+
+version: "0.1"
+
+entities:
+  1VO9PWVQ: "RAM Rete Autostrade Mediterranee per la Logistica, le Infrastrutture ed i Trasporti S.p.a."
+  9YBY9CC5: "EUTALIA S.P.A."
+  AGENAS: "Agenzia Nazionale per i Servizi Sanitari Regionali - AGENAS"
+  ANSV: "Agenzia Nazionale per la Sicurezza del Volo - ANSV"
+  KH5RHFCV: "Ministero dell'Università e della Ricerca"
+  WQF3ZW8F: "Ministero del Turismo"
+  agdogane: "Agenzia delle Dogane e dei Monopoli"
+  age: "Agenzia delle Entrate"
+  agid: "Agenzia per l'Italia Digitale - AgID"
+  agpia: "Autorità Garante per l'Infanzia e l'Adolescenza"
+  aifa_rm: "Agenzia Italiana del Farmaco - AIFA"
+  ailcsvil: "Agenzia Italiana per la Cooperazione allo Sviluppo - AICS"
+  csspa: "Sport e salute S.p.A."
+  gcss: "Giunta storica nazionale"
+  gpdp: "Garante per la protezione dei dati personali"
+  ice_rm: "Agenzia per la promozione all'estero e l'internazionalizzazione delle imprese italiane - ICE"
+  iipsa: "Istituto Italiano per La Storia Antica"
+  ils_rm: "Sviluppo Lavoro Italia S.p.A."
+  inail: "Istituto Nazionale per l'Assicurazione contro gli Infortuni sul Lavoro - INAIL"
+  inlsnr: "Ispettorato Nazionale per La Sicurezza Nucleare e La Radioprotezione"
+  inps: "Istituto Nazionale Previdenza Sociale - INPS"
+  inrm: "Istituto Nazionale di Ricerca Metrologica - INRIM"
+  isile: "Istituto Storico Italiano per L'Eta' Moderna e Contemporanea"
+  m_ae: "Ministero degli Affari Esteri e della Cooperazione Internazionale"
+  m_amte: "Ministero dell'Ambiente e della Sicurezza Energetica"
+  m_bac: "Ministero della Cultura"
+  m_d: "Ministero della Difesa"
+  m_dg: "Ministero della Giustizia"
+  m_ef: "Ministero dell'Economia e delle Finanze"
+  m_inf: "Ministero delle Infrastrutture e dei Trasporti"
+  m_it: "Ministero dell'Interno"
+  m_lps: "Ministero del Lavoro e delle Politiche Sociali"
+  m_paf: "Ministero dell'Agricoltura, della Sovranità alimentare e delle Foreste"
+  m_pi: "Ministero dell'Istruzione e del Merito"
+  m_sa: "Ministero della Salute"
+  m_svec: "Ministero delle Imprese e del Made in Italy"
+
+# Soggetti che spesso ricevono affidamenti in rapporto strutturale PA–società
+# (in house / società di scopo). Solo contesto, non esclusione automatica.
+structural_awardee_patterns:
+  - "INFRASTRUTTURE MILANO CORTINA"
+  - "INVITALIA"
+  - "SPORT E SALUTE"
+  - "SOCC. IN HOUSE"
