@@ -24,6 +24,82 @@ DISCLAIMER = (
 )
 
 
+def load_entity_config(path: Path | None) -> dict:
+    """Carica mappa enti e pattern strutturali (opzionale, fail-open)."""
+    if path is None or not path.exists():
+        return {"entities": {}, "structural_awardee_patterns": []}
+    data = load_yaml(path)
+    return {
+        "entities": data.get("entities") or {},
+        "structural_awardee_patterns": data.get("structural_awardee_patterns") or [],
+    }
+
+
+def _fact_value(facts: list, prefix: str) -> str:
+    prefix_l = prefix.lower()
+    for f in facts:
+        if ":" not in f:
+            continue
+        k, v = f.split(":", 1)
+        if k.strip().lower() == prefix_l:
+            return v.strip()
+    return ""
+
+
+def assess_data_quality(lead: dict) -> tuple[str, list[str], dict]:
+    """Valuta qualità temporale delle fonti. Non inventa: solo conteggi.
+
+    Returns:
+        level: ok | weak | unknown
+        flags: elenco motivazioni machine-readable
+        meta: unique_dates, date_min, date_max, n_sources
+    """
+    sources = lead.get("sources") or []
+    dates = sorted({
+        (s.get("award_date") or "").strip()
+        for s in sources
+        if (s.get("award_date") or "").strip()
+    })
+    meta = {
+        "n_sources": len(sources),
+        "unique_award_dates": len(dates),
+        "award_date_min": dates[0] if dates else "",
+        "award_date_max": dates[-1] if dates else "",
+    }
+    flags: list[str] = []
+    if not sources:
+        return "unknown", ["no_sources"], meta
+    if not dates:
+        return "unknown", ["no_award_dates"], meta
+    if len(dates) == 1 and len(sources) >= 3:
+        flags.append("all_award_dates_identical")
+        return "weak", flags, meta
+    if len(dates) == 1:
+        flags.append("single_award_date")
+        return "weak", flags, meta
+    return "ok", flags, meta
+
+
+def resolve_entity(lead: dict, entity_map: dict) -> tuple[str, str]:
+    """Ritorna (entity_id, entity_label)."""
+    facts = lead.get("observed_facts") or []
+    entity_id = _fact_value(facts, "Ente") or _fact_value(facts, "entity_id")
+    label = entity_map.get(entity_id, "") if entity_id else ""
+    return entity_id, label
+
+
+def structural_context(lead: dict, patterns: list[str]) -> bool:
+    """True se l'aggiudicatario matcha un pattern di soggetto spesso strutturale."""
+    awardee = _fact_value(lead.get("observed_facts") or [], "Aggiudicatario").upper()
+    if not awardee:
+        return False
+    for p in patterns:
+        if p.upper() in awardee:
+            return True
+    return False
+
+
+
 def load_yaml(path: Path) -> dict:
     with path.open(encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -140,16 +216,54 @@ def derive_ranking_date(leads: list[dict]) -> str:
     return max(dates)
 
 
-def rank_leads(leads: list[dict], rules: dict, history: list[dict], ranking_date: str) -> list[dict]:
+def rank_leads(
+    leads: list[dict],
+    rules: dict,
+    history: list[dict],
+    ranking_date: str,
+    entity_cfg: dict | None = None,
+) -> list[dict]:
+    entity_cfg = entity_cfg or {"entities": {}, "structural_awardee_patterns": []}
+    entity_map = entity_cfg.get("entities") or {}
+    patterns = entity_cfg.get("structural_awardee_patterns") or []
+    quality_cfg = (rules.get("data_quality") or {})
+    malus_weak = float(quality_cfg.get("score_malus_weak", 10))
+    malus_unknown = float(quality_cfg.get("score_malus_unknown", 5))
+
     ranked = []
     for lead in leads:
         score, reasons = compute_score(lead, rules, history)
         ranked_lead = dict(lead)  # copia
+
+        level, flags, meta = assess_data_quality(ranked_lead)
+        ranked_lead["data_quality"] = level
+        ranked_lead["data_quality_flags"] = flags
+        ranked_lead["award_date_min"] = meta["award_date_min"]
+        ranked_lead["award_date_max"] = meta["award_date_max"]
+        ranked_lead["unique_award_dates"] = meta["unique_award_dates"]
+
+        if level == "weak" and malus_weak > 0:
+            score = max(0.0, round(score - malus_weak, 1))
+            reasons = list(reasons) + [f"malus data_quality weak (-{malus_weak})"]
+        elif level == "unknown" and malus_unknown > 0:
+            score = max(0.0, round(score - malus_unknown, 1))
+            reasons = list(reasons) + [f"malus data_quality unknown (-{malus_unknown})"]
+
+        entity_id, entity_label = resolve_entity(ranked_lead, entity_map)
+        ranked_lead["entity_id"] = entity_id
+        ranked_lead["entity_label"] = entity_label or entity_id
+
+        if structural_context(ranked_lead, patterns):
+            ranked_lead["context_tags"] = ["possible_structural_relationship"]
+            reasons = list(reasons) + ["contesto: possibile rapporto strutturale PA–soggetto"]
+        else:
+            ranked_lead["context_tags"] = []
+
         ranked_lead["priority_score"] = score
         ranked_lead["priority_reasons"] = reasons
         ranked_lead["ranking_date"] = ranking_date
         ranked_lead["ranking_version"] = rules.get("version", "0.1")
-        ranked_lead["disclaimer"] = rules["behavior"].get("disclaimer", DISCLAIMER)
+        ranked_lead["disclaimer"] = rules.get("disclaimer") or rules.get("behavior", {}).get("disclaimer", DISCLAIMER)
         ranked.append(ranked_lead)
 
     # Ordina per score decrescente, poi data_through e id (tie-break deterministico)
@@ -169,6 +283,12 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path, help="Directory di output")
     parser.add_argument("--history", type=Path, help="Directory storico (opzionale)")
     parser.add_argument("--rules", required=True, type=Path, help="File YAML regole ranking")
+    parser.add_argument(
+        "--entity-config",
+        type=Path,
+        default=None,
+        help="YAML mappa codici ente -> nomi (opzionale)",
+    )
     args = parser.parse_args()
 
     if not args.input.exists():
@@ -197,7 +317,7 @@ def main() -> None:
             with p.open(encoding="utf-8") as f:
                 history.append(json.load(f))
 
-    ranked = rank_leads(leads, rules, history, ranking_date)
+    ranked = rank_leads(leads, rules, history, ranking_date, entity_cfg=load_entity_config(args.entity_config))
 
     args.output.mkdir(parents=True, exist_ok=True)
     out_file = args.output / "ranked_leads.json"
