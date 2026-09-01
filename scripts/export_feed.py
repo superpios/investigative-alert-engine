@@ -41,6 +41,25 @@ def main() -> None:
         lines.append(f"- ID: `{lead.get('id')}`")
         lines.append(f"- Regola: `{lead.get('rule_id')}`")
         lines.append(f"- Periodo: {lead.get('period')}")
+        entity_label = lead.get("entity_label") or lead.get("entity_id") or ""
+        entity_id = lead.get("entity_id") or ""
+        if entity_label:
+            if entity_id and entity_label != entity_id:
+                lines.append(f"- Ente: **{entity_label}** (`{entity_id}`)")
+            else:
+                lines.append(f"- Ente: `{entity_label}`")
+        dq = lead.get("data_quality") or "unknown"
+        lines.append(f"- Qualità dati: `{dq}`")
+        if lead.get("data_quality_flags"):
+            lines.append(f"  - flag: {', '.join(lead['data_quality_flags'])}")
+        dmin, dmax = lead.get("award_date_min") or "", lead.get("award_date_max") or ""
+        if dmin or dmax:
+            if dmin == dmax:
+                lines.append(f"- Date affidamenti nelle fonti: {dmin or dmax}")
+            else:
+                lines.append(f"- Date affidamenti nelle fonti: {dmin} → {dmax}")
+        if lead.get("context_tags"):
+            lines.append(f"- Contesto: {', '.join(lead['context_tags'])}")
         if lead.get("priority_reasons"):
             lines.append("- Motivi prioritizzazione:")
             for r in lead["priority_reasons"]:
