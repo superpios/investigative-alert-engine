@@ -44,3 +44,9 @@ behavior:
 # Disclaimer obbligatorio (non modificare)
 disclaimer: >
   Questo non dimostra alcun illecito. Indica solo una concentrazione di segnali quantitativi che merita verifica umana.
+
+# Qualità dati (date nelle fonti): malus sullo score, non esclusione
+data_quality:
+  score_malus_weak: 10      # tutte le award_date identiche o una sola data
+  score_malus_unknown: 5   # fonti senza date
+
