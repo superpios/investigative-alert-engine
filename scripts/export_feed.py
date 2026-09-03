@@ -52,6 +52,11 @@ def main() -> None:
         lines.append(f"- Qualità dati: `{dq}`")
         if lead.get("data_quality_flags"):
             lines.append(f"  - flag: {', '.join(lead['data_quality_flags'])}")
+        n_url = lead.get("unique_source_urls")
+        n_src = None
+        # n_sources not always stored; derive from flags context if present
+        if n_url is not None:
+            lines.append(f"- URL sorgente distinte: {n_url}")
         dmin, dmax = lead.get("award_date_min") or "", lead.get("award_date_max") or ""
         if dmin or dmax:
             if dmin == dmax:
