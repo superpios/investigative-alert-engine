@@ -47,12 +47,12 @@ def _fact_value(facts: list, prefix: str) -> str:
 
 
 def assess_data_quality(lead: dict) -> tuple[str, list[str], dict]:
-    """Valuta qualità temporale delle fonti. Non inventa: solo conteggi.
+    """Valuta qualità delle fonti (date + diversità URL). Solo conteggi, nessun giudizio.
 
     Returns:
         level: ok | weak | unknown
         flags: elenco motivazioni machine-readable
-        meta: unique_dates, date_min, date_max, n_sources
+        meta: n_sources, unique dates/urls, date min/max
     """
     sources = lead.get("sources") or []
     dates = sorted({
@@ -60,22 +60,40 @@ def assess_data_quality(lead: dict) -> tuple[str, list[str], dict]:
         for s in sources
         if (s.get("award_date") or "").strip()
     })
+    urls = sorted({
+        (s.get("source_url") or "").strip()
+        for s in sources
+        if (s.get("source_url") or "").strip()
+    })
     meta = {
         "n_sources": len(sources),
         "unique_award_dates": len(dates),
+        "unique_source_urls": len(urls),
         "award_date_min": dates[0] if dates else "",
         "award_date_max": dates[-1] if dates else "",
     }
     flags: list[str] = []
     if not sources:
         return "unknown", ["no_sources"], meta
-    if not dates:
-        return "unknown", ["no_award_dates"], meta
+    if not dates and not urls:
+        return "unknown", ["no_award_dates", "no_source_urls"], meta
+
+    # Fonte unica ripetuta su più record: indice/elenco, non atti distinti verificabili
+    if len(sources) >= 3 and len(urls) <= 1:
+        flags.append("single_source_url_repeated")
     if len(dates) == 1 and len(sources) >= 3:
         flags.append("all_award_dates_identical")
-        return "weak", flags, meta
-    if len(dates) == 1:
+    elif len(dates) == 1:
         flags.append("single_award_date")
+    if not dates:
+        flags.append("no_award_dates")
+
+    if flags:
+        # qualsiasi flag serio → weak (o unknown se manca tutto)
+        if "no_sources" in flags:
+            return "unknown", flags, meta
+        if flags == ["no_award_dates"] and len(urls) >= 2:
+            return "weak", flags, meta
         return "weak", flags, meta
     return "ok", flags, meta
 
@@ -241,6 +259,7 @@ def rank_leads(
         ranked_lead["award_date_min"] = meta["award_date_min"]
         ranked_lead["award_date_max"] = meta["award_date_max"]
         ranked_lead["unique_award_dates"] = meta["unique_award_dates"]
+        ranked_lead["unique_source_urls"] = meta["unique_source_urls"]
 
         if level == "weak" and malus_weak > 0:
             score = max(0.0, round(score - malus_weak, 1))
