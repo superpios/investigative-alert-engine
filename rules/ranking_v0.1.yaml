@@ -50,3 +50,9 @@ data_quality:
   score_malus_weak: 10      # tutte le award_date identiche o una sola data
   score_malus_unknown: 5   # fonti senza date
 
+
+  # Flag aggiuntivi (gestiti in rank_leads.assess_data_quality):
+  # - all_award_dates_identical / single_award_date
+  # - single_source_url_repeated  (>=3 record, <=1 URL distinta: tipico indice/elenco)
+  # Livello weak → applica score_malus_weak sopra.
+
